@@ -1000,6 +1000,8 @@ class Midas(object):
                  excessive= False,
                  plot_main = True,
                  skip_plot = False,
+                 save_figs = False,
+                 save_path = "",
                  ):
     """
     This function spikes in additional missingness, so that known values can be
@@ -1073,6 +1075,12 @@ class Midas(object):
       (default = False). This may be desirable when users are conducting multiple 
       overimputation exercises sequentially and are primarily interested in the console 
       output.
+      
+      save_figs: Boolean. Specifies whether to save generated figures instead of
+      displaying graphical output (default = False).
+      
+      save_path: String. Specifies path to save pyplots if save_figs = True 
+      (default = working directory).
 
       verbose: Boolean. Prints out messages, including loss, to the terminal (default = True).
 
@@ -1104,7 +1112,7 @@ class Midas(object):
 
     if excessive:
       import time
-
+    
     overimp_rng = np.random.default_rng(spike_seed)
 
     rmse_in = False
@@ -1175,8 +1183,8 @@ class Midas(object):
         train_rng = np.random.default_rng(self.seed)
       
       sess.run(self.init)
-      print("Model initialised")
-      print()
+      print("Model initialised", flush = True)
+      print(flush = True)
       for epoch in range(training_epochs + 1):
         count = 0
         run_loss = 0
@@ -1201,7 +1209,7 @@ class Midas(object):
             run_loss += loss
         if verbose:
           if epoch % verbosity_ival == 0:
-            print('Epoch:', epoch, ", loss:", str(run_loss/count))
+            print('Epoch:', epoch, ", loss:", str(run_loss/count), flush = True)
 
         if epoch % report_ival == 0:
           """
@@ -1291,7 +1299,14 @@ class Midas(object):
                 plt.xlabel(temp_true_name)
                 plt.ylabel('Proportion')
                 plt.legend()
-                plt.show()
+                
+                if save_figs:
+                  plt.tight_layout()
+                  plt.savefig(save_path+temp_true_name+"_epoch_"+str(epoch)+".png")
+                  plt.clf()
+                else:
+                  plt.show()
+                  
               agg_sacc += (1 - sacc(temp_true.values, temp_pred.values,
                                    temp_spike)) / n_softmax
             elif self.output_types[n] == 'rmse':
@@ -1311,8 +1326,14 @@ class Midas(object):
                   plt.xlabel(temp_pred.columns[n_rmse])
                   plt.ylabel('Density')
                   plt.legend()
-                plt.show()
-
+                  
+                  if save_figs:
+                    plt.tight_layout()
+                    plt.savefig(save_path+temp_pred.columns[n_rmse]+"_epoch_"+str(epoch)+".png")
+                    plt.clf()
+                  else:
+                    plt.show()
+                
               agg_rmse += np.sqrt(mse(temp_true[temp_spike],
                                          temp_pred[temp_spike]))
             else:
@@ -1326,27 +1347,34 @@ class Midas(object):
                 plt.xlabel('Variables')
                 plt.ylabel('Proportion')
                 plt.legend()
-                plt.show()
+                
+                if save_figs:
+                  plt.tight_layout()
+                  plt.savefig(save_path+"binary_vars_epoch_"+str(epoch)+".png")
+                  plt.clf()
+                else:
+                  plt.show()
+
               agg_bacc += 1 - bacc(temp_true.values, temp_pred.values, temp_spike)
 
           #Plot losses depending on which loss values present in data
           if rmse_in:
             s_rmse.append(single_rmse)
             a_rmse.append(agg_rmse)
-            print("Individual RMSE on spike-in:", single_rmse)
-            print("Aggregated RMSE on spike-in:", agg_rmse)
+            print("Individual RMSE on spike-in:", single_rmse, flush = True)
+            print("Aggregated RMSE on spike-in:", agg_rmse, flush = True)
             
           if sacc_in:
             s_sacc.append(single_sacc)
             a_sacc.append(agg_sacc)
-            print("Individual error on softmax spike-in:", single_sacc)
-            print("Aggregated error on softmax spike-in:", agg_sacc)
+            print("Individual error on softmax spike-in:", single_sacc, flush = True)
+            print("Aggregated error on softmax spike-in:", agg_sacc, flush = True)
             
           if bacc_in:
             s_bacc.append(single_bacc)
             a_bacc.append(agg_bacc)
-            print("Individual error on binary spike-in:", single_bacc)
-            print("Aggregated error on binary spike-in:", agg_bacc)
+            print("Individual error on binary spike-in:", single_bacc, flush = True)
+            print("Aggregated error on binary spike-in:", agg_bacc, flush = True)
 
           if plot_main or ((training_epochs - epoch) < report_ival):
             if rmse_in:
@@ -1389,14 +1417,18 @@ class Midas(object):
             if not skip_plot:
               plt.title("Overimputation error during training")
               plt.ylabel("Error")
-              plt.legend()
+              plt.legend(loc=4)
               plt.ylim(ymin= 0)
               plt.xlabel("Reporting interval")
-              plt.show()
-            
-
+              
+              if save_figs:
+                plt.tight_layout()
+                plt.savefig(save_path+"overimputation_error.png")
+                plt.clf()
+              else:
+                plt.show()
           
-      print("Overimputation complete. Adjust complexity as needed.")
+      print("Overimputation complete. Adjust complexity as needed.", flush = True)
       return self
 
   def build_model_pipeline(self,
@@ -1773,3 +1805,4 @@ class Midas(object):
     self.na_matrix = self.imputation_target.notnull().astype(np.bool)
     self.imputation_target.fillna(0, inplace= True)
     return self
+

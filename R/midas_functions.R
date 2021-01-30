@@ -25,6 +25,7 @@ import_midas <- function(...) {
 #' @param learn_rate A number, the learning rate \eqn{\gamma} (default = 0.0001), which controls the size of the weight adjustment in each training epoch. In general, higher values reduce training time at the expense of less accurate results.
 #' @param input_drop A number between 0 and 1. The probability of corruption for input columns in training mini-batches (default = 0.8). Higher values increase training time but reduce the risk of overfitting. In our experience, values between 0.7 and 0.95 deliver the best performance.
 #' @param seed An integer, the value to which \proglang{Python}'s pseudo-random number generator is initialized. This enables users to ensure that data shuffling, weight and bias initialization, and missingness indicator vectors are reproducible.
+#' @param train_batch An integer, the number of observations in training mini-batches (default = 16).
 #' @param latent_space_size An integer, the number of normal dimensions used to parameterize the latent space.
 #' @param cont_adj A number, weights the importance of continuous variables in the loss function
 #' @param binary_adj A number, weights the importance of binary variables in the loss function
@@ -46,6 +47,7 @@ train <- function(data,
                    learn_rate = 0.0004,
                    input_drop = 0.8,
                    seed=123L,
+                   train_batch = 16L,
                    latent_space_size = 4,
                    cont_adj= 1.0,
                    binary_adj= 1.0,
@@ -56,7 +58,6 @@ train <- function(data,
                    vae_sample_var = 1.0) {
 
   ## Parameters not integrated:
-  # train_batch = 16,
   # output_layers= 'reversed',
   # loss_scale= 1,
   # init_scale= 1,
@@ -81,6 +82,7 @@ train <- function(data,
                            learn_rate = learn_rate,
                            input_drop = input_drop,
                            seed = as.integer(seed),
+                           train_batch = as.integer(train_batch),
                            vae_layer = vae_layer,
                            latent_space_size = as.integer(latent_space_size),
                            cont_adj = cont_adj,
@@ -122,7 +124,7 @@ train <- function(data,
 #' @param mid_obj Object of class `midas`, the result of running `rMIDAS::train()`
 #' @param m An integer, the number of completed datasets required
 #' @param file Path to save completed datasets. If `NULL`, completed datasets are only loaded into memory.
-#' @param file_root A character string, used as the root for all filenames when saving completed datasets if a `filepath` is supplied. If no file_root is provided, saved datasets will be saved as "file/midas_impute_yymmdd_hhmmss_m.csv"
+#' @param file_root A character string, used as the root for all filenames when saving completed datasets if a `filepath` is supplied. If no file_root is provided, completed datasets will be saved as "file/midas_impute_yymmdd_hhmmss_m.csv"
 #' @param unscale Boolean, indicating whether to unscale any columns that were previously minmax scaled between 0 and 1
 #' @param bin_label Boolean, indicating whether to add back labels for binary columns
 #' @param cat_coalesce Boolean, indicating whether to decode the one-hot encoded categorical variables
@@ -216,7 +218,7 @@ complete <- function(mid_obj,
 
     }
 
-    return(df)
+    return(as.data.frame(df))
 
   })
 
@@ -259,6 +261,7 @@ complete <- function(mid_obj,
 #' @param plot_vars Boolean, specifies whether to plot the distribution of original versus overimputed values. This takes the form of a density plot for continuous variables and a barplot for categorical variables (showing proportions of each class).
 #' @param skip_plot Boolean, specifies whether to suppress the main graphical output. This may be desirable when users are conducting a series of overimputation exercises and are primarily interested in the console output. **Note**, when `skip_plot = FALSE`, users must manually close the resulting pyplot window before the code will terminate.
 #' @param spike_seed,seed An integer, to initialize the pseudo-random number generators. Separate seeds can be provided for the spiked-in missingness and imputation, otherwise `spike_seed` is set to `seed` (default = 123L).
+#' @param save_path String, indicating path to directory to save overimputation figures. Users should include a trailing "/" at the end of the path i.e. save_path = "path/to/figures/".
 #' @inheritParams train
 #' @seealso \code{\link{train}} for the main imputation function.
 #' @export
@@ -276,12 +279,14 @@ overimpute <- function(# Input data
                        plot_vars = FALSE,
                        skip_plot = FALSE,
                        spike_seed = NULL,
+                       save_path = "",
 
                        # MIDAS model parameters
                        layer_structure = c(256,256,256),
                        learn_rate = 0.0004,
                        input_drop = 0.8,
                        seed=123L,
+                       train_batch=16L,
                        latent_space_size = 4,
                        cont_adj= 1.0,
                        binary_adj= 1.0,
@@ -316,7 +321,7 @@ overimpute <- function(# Input data
   }
 
   if (plot_vars) {
-    message("**Note**: Plotting variables is enabled.\n Overimputation will not proceed until these graphs are closed.")
+    message("**Note**: Plotting for individual variables is enabled.\nIf your dataset has many variables, this will generate a lot of files!\nTo run without plotting variable graphs, set plot_vars = FALSE\n")
   }
 
 
@@ -324,6 +329,7 @@ overimpute <- function(# Input data
                            learn_rate = learn_rate,
                            input_drop = input_drop,
                            seed = as.integer(seed),
+                           train_batch = as.integer(train_batch),
                            vae_layer = vae_layer,
                            latent_space_size = as.integer(latent_space_size),
                            cont_adj = cont_adj,
@@ -358,7 +364,9 @@ overimpute <- function(# Input data
                                       plot_vars = plot_vars,
                                       skip_plot = skip_plot,
                                       plot_main = FALSE,
-                                      spike_seed = as.integer(spike_seed))
+                                      spike_seed = as.integer(spike_seed),
+                                      save_figs = TRUE,
+                                      save_path = save_path)
 
   return(mod_overimp)
 

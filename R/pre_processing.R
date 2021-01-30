@@ -31,7 +31,7 @@
 #' cat <- c("a","f")
 #'
 #' convert(data, bin_cols = bin, cat_cols = cat)
-convert <- function(data, bin_cols, cat_cols, minmax_scale = FALSE) {
+convert <- function(data, bin_cols = NULL, cat_cols = NULL, minmax_scale = FALSE) {
 
   # Check data input
 
@@ -72,7 +72,26 @@ convert <- function(data, bin_cols, cat_cols, minmax_scale = FALSE) {
     data_cat_oh <- mltools::one_hot(data_cat, cols = names(data_cat))
 
     cat_lists <- lapply(cat_cols,
-                        function(x) c(names(data_cat_oh)[startsWith(names(data_cat_oh),paste0(x,"_"))]))
+                        function(x) {
+
+                          tmp_names <- names(data_cat_oh)
+                          # Locate whether other variables share same root e.g. c("var1", "var1_other")
+                          if (sum(grepl(x, cat_cols)) > 1) {
+
+                            var_matches <- cat_cols[grep(x, cat_cols)]
+
+                            # Get vector of variables to remove from matching
+                            del_vars <- var_matches[!(var_matches == x)]
+
+                            # Loop through and delete
+                            for (del_var in del_vars) {
+                              tmp_names <- tmp_names[!grepl(del_var, tmp_names)]
+                            }
+                          }
+
+                          # Now find one-hot encoded names
+                          c(tmp_names[startsWith(tmp_names,paste0(x,"_"))])
+                        })
 
   }
 
@@ -91,7 +110,7 @@ convert <- function(data, bin_cols, cat_cols, minmax_scale = FALSE) {
     if (!(sum(!is.na(b_vals)) == 2)) {
       stop("Column '",bin_col,"' does not have two non-missing values")
 
-    } else if (sum(b_vals[!is.na(b_vals)] %in% c(1,2)) != 2) {
+    } else if (sum(b_vals[!is.na(b_vals)] %in% c(1,0)) != 2) {
 
       data_bin[,bin_col] <- ifelse(data_bin[,bin_col, with = FALSE] == b_vals[!is.na(b_vals)][1],
                                    1L,0L)
