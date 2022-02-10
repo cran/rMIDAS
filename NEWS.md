@@ -1,11 +1,14 @@
+# rMIDAS 0.4
+
+* `python` argument in `set_python_env` renamed to `x` for clarity
+* Minor fixes including remedying bug in `complete()` function
+* Improved documentation
+
 # rMIDAS 0.3
 
 * Minor updates to underlying Python code to mirror MIDASpy v1.2.1
-
 * Added NULL defaults to cat_cols and bin_cols parameters within `rMIDAS::convert()`
-
 * Overimputation legend now plotted in bottom-right corner of figure
-
 * Minor changes to README
 
 # rMIDAS 0.2

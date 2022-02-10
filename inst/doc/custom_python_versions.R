@@ -5,7 +5,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #  
 #  library(rMIDAS)
 #  
-#  set_python_env(python = "~/path/to/bin/python")
+#  set_python_env(x = "~/path/to/bin/python")
 #  
 #  # Then proceed as normal...
 #  
@@ -14,14 +14,17 @@ knitr::opts_chunk$set(echo = TRUE)
 #  
 #  library(rMIDAS)
 #  
-#  set_python_env(python = "myenv", type = "virtualenv")
+#  set_python_env(x = "myenv", type = "virtualenv")
 #  
 #  # or
 #  
-#  set_python_env(python = "mycondaenv", type = "conda")
+#  set_python_env(x = "mycondaenv", type = "conda")
 #  
 #  # Then proceed as normal...
 #  
+
+## ---- eval=FALSE--------------------------------------------------------------
+#  set_python_env(x = "rmidas-env", type = "conda")
 
 ## ---- eval = FALSE------------------------------------------------------------
 #  
@@ -35,14 +38,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## ---- eval = FALSE------------------------------------------------------------
 #  
-#  set_python_env("/usr/local/bin/python3")
+#  set_python_env(x = "/usr/local/bin/python3")
 #  
 #  # Then proceed as normal...
 
 ## ---- eval = FALSE------------------------------------------------------------
 #  
 #  reticulate::virtualenv_create(envname = "myenv", python = "/path/to/your/python3/bin")
-#  set_python_env("myenv", type = "virtualenv")
+#  set_python_env(x = "myenv", type = "virtualenv")
 #  
 #  # Then proceed as normal...
 #  

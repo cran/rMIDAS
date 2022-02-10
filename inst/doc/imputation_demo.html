@@ -14,59 +14,17 @@
 
 <title>Imputing missing data using rMIDAS</title>
 
-<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
-// v0.0.1
-// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
-
-document.addEventListener('DOMContentLoaded', function() {
-  const codeList = document.getElementsByClassName("sourceCode");
-  for (var i = 0; i < codeList.length; i++) {
-    var linkList = codeList[i].getElementsByTagName('a');
-    for (var j = 0; j < linkList.length; j++) {
-      if (linkList[j].innerHTML === "") {
-        linkList[j].setAttribute('aria-hidden', 'true');
-      }
-    }
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
   }
-});
-</script>
-<style type="text/css">
-a.anchor-section {margin-left: 10px; visibility: hidden; color: inherit;}
-a.anchor-section::before {content: '#';}
-.hasAnchor:hover a.anchor-section {visibility: visible;}
-</style>
-<script>// Anchor sections v1.0 written by Atsushi Yasumoto on Oct 3rd, 2020.
-document.addEventListener('DOMContentLoaded', function() {
-  // Do nothing if AnchorJS is used
-  if (typeof window.anchors === 'object' && anchors.hasOwnProperty('hasAnchorJSLink')) {
-    return;
-  }
-
-  const h = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-
-  // Do nothing if sections are already anchored
-  if (Array.from(h).some(x => x.classList.contains('hasAnchor'))) {
-    return null;
-  }
-
-  // Use section id when pandoc runs with --section-divs
-  const section_id = function(x) {
-    return ((x.classList.contains('section') || (x.tagName === 'SECTION'))
-            ? x.id : '');
-  };
-
-  // Add anchors
-  h.forEach(function(x) {
-    const id = x.id || section_id(x.parentElement);
-    if (id === '') {
-      return null;
-    }
-    let anchor = document.createElement('a');
-    anchor.href = '#' + id;
-    anchor.classList = ['anchor-section'];
-    x.classList.add('hasAnchor');
-    x.appendChild(anchor);
-  });
 });
 </script>
 
@@ -80,21 +38,28 @@ document.addEventListener('DOMContentLoaded', function() {
     </style>
 
 
-<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -114,7 +79,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
@@ -168,6 +133,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   }
 })();
 </script>
+
 
 
 
@@ -375,44 +341,44 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="loading-the-data" class="section level2">
 <h2>Loading the data</h2>
 <p>Once <strong>rMIDAS</strong> is initialized, we can load our data. For the purpose of this example, we’ll use a subset of the Adult data:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">library</span>(rMIDAS)</span>
-<span id="cb1-2"><a href="#cb1-2"></a></span>
-<span id="cb1-3"><a href="#cb1-3"></a>adult &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;https://raw.githubusercontent.com/MIDASverse/MIDASpy/master/Examples/adult_data.csv&quot;</span>,</span>
-<span id="cb1-4"><a href="#cb1-4"></a>                  <span class="dt">row.names =</span> <span class="dv">1</span>)[<span class="dv">1</span><span class="op">:</span><span class="dv">1000</span>,]</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rMIDAS)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>adult <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;https://raw.githubusercontent.com/MIDASverse/MIDASpy/master/Examples/adult_data.csv&quot;</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">row.names =</span> <span class="dv">1</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">1000</span>,]</span></code></pre></div>
 <p>As the dataset has a very low proportion of missingness (one of the reasons it is favored for machine learning tasks), we randomly set 10% of observed values as missing in each column using the <strong>rMIDAS</strong>’ <code>add_missingness()</code> function:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">set.seed</span>(<span class="dv">89</span>)</span>
-<span id="cb2-2"><a href="#cb2-2"></a></span>
-<span id="cb2-3"><a href="#cb2-3"></a>adult &lt;-<span class="st"> </span><span class="kw">add_missingness</span>(adult, <span class="dt">prop =</span> <span class="fl">0.1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">89</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>adult <span class="ot">&lt;-</span> <span class="fu">add_missingness</span>(adult, <span class="at">prop =</span> <span class="fl">0.1</span>)</span></code></pre></div>
 <p>Next, we make a list of all categorical and binary variables, before preprocessing the data for training using the <code>convert()</code> function. Setting the <code>minmax_scale</code> argument to <code>TRUE</code> ensures that continuous variables are scaled between 0 and 1, which can substantially improve convergence in the training step. All pre-processing steps can be reversed after imputation:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>adult_cat &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&#39;workclass&#39;</span>,<span class="st">&#39;marital_status&#39;</span>,<span class="st">&#39;relationship&#39;</span>,<span class="st">&#39;race&#39;</span>,<span class="st">&#39;education&#39;</span>,<span class="st">&#39;occupation&#39;</span>,<span class="st">&#39;native_country&#39;</span>)</span>
-<span id="cb3-2"><a href="#cb3-2"></a>adult_bin &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&#39;sex&#39;</span>,<span class="st">&#39;class_labels&#39;</span>)</span>
-<span id="cb3-3"><a href="#cb3-3"></a></span>
-<span id="cb3-4"><a href="#cb3-4"></a><span class="co"># Apply rMIDAS preprocessing steps</span></span>
-<span id="cb3-5"><a href="#cb3-5"></a>adult_conv &lt;-<span class="st"> </span><span class="kw">convert</span>(adult, </span>
-<span id="cb3-6"><a href="#cb3-6"></a>                      <span class="dt">bin_cols =</span> adult_bin, </span>
-<span id="cb3-7"><a href="#cb3-7"></a>                      <span class="dt">cat_cols =</span> adult_cat,</span>
-<span id="cb3-8"><a href="#cb3-8"></a>                      <span class="dt">minmax_scale =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>adult_cat <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&#39;workclass&#39;</span>,<span class="st">&#39;marital_status&#39;</span>,<span class="st">&#39;relationship&#39;</span>,<span class="st">&#39;race&#39;</span>,<span class="st">&#39;education&#39;</span>,<span class="st">&#39;occupation&#39;</span>,<span class="st">&#39;native_country&#39;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>adult_bin <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&#39;sex&#39;</span>,<span class="st">&#39;class_labels&#39;</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply rMIDAS preprocessing steps</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>adult_conv <span class="ot">&lt;-</span> <span class="fu">convert</span>(adult, </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">bin_cols =</span> adult_bin, </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">cat_cols =</span> adult_cat,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">minmax_scale =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p>The data are now ready to be fed into the MIDAS algorithm, which involves a single call of the <code>train()</code> function. At this stage, we specify the dimensions, input corruption proportion, and other hyperparameters of the MIDAS neural network as well as the number of training epochs:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># Train the model for 2 epochs</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a>adult_train &lt;-<span class="st"> </span><span class="kw">train</span>(adult_conv,</span>
-<span id="cb4-3"><a href="#cb4-3"></a>                       <span class="dt">training_epochs =</span> <span class="dv">20</span>,</span>
-<span id="cb4-4"><a href="#cb4-4"></a>                       <span class="dt">layer_structure =</span> <span class="kw">c</span>(<span class="dv">128</span>,<span class="dv">128</span>),</span>
-<span id="cb4-5"><a href="#cb4-5"></a>                       <span class="dt">input_drop =</span> <span class="fl">0.75</span>,</span>
-<span id="cb4-6"><a href="#cb4-6"></a>                       <span class="dt">seed =</span> <span class="dv">89</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Train the model for 2 epochs</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>adult_train <span class="ot">&lt;-</span> <span class="fu">train</span>(adult_conv,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">training_epochs =</span> <span class="dv">20</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">layer_structure =</span> <span class="fu">c</span>(<span class="dv">128</span>,<span class="dv">128</span>),</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                       <span class="at">input_drop =</span> <span class="fl">0.75</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                       <span class="at">seed =</span> <span class="dv">89</span>)</span></code></pre></div>
 <p>Once training is complete, we can generate any number of completed datasets using the <code>complete()</code> function (below we generate 10). The completed dataframes can also be saved as ‘.csv’ files using the <code>file</code> and <code>file_root</code> arguments (not demonstrated here). By default, <code>complete()</code> unscales continuous variables and converts binary and categorical variables back to their original form.</p>
 <p>Since the MIDAS algorithm returns predicted probabilities for binary and categorical variables, imputed values of such variables can be generated using one of two options. When <code>fast = FALSE</code> (the default), <code>complete()</code> uses the predicted probabilities for each category level to take a weighted random draw from the set of all levels. When <code>fast = TRUE</code>, the function selects the level with the highest predicted probability. If completed datasets are very large or <code>complete()</code> is taking a long time to run, users may benefit from choosing the latter option:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Generate 10 imputed datasets</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a>adult_complete &lt;-<span class="st"> </span><span class="kw">complete</span>(adult_train, <span class="dt">m =</span> <span class="dv">10</span>)</span>
-<span id="cb5-3"><a href="#cb5-3"></a></span>
-<span id="cb5-4"><a href="#cb5-4"></a><span class="co"># Inspect first imputed dataset:</span></span>
-<span id="cb5-5"><a href="#cb5-5"></a><span class="kw">head</span>(adult_complete[[<span class="dv">1</span>]])</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate 10 imputed datasets</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>adult_complete <span class="ot">&lt;-</span> <span class="fu">complete</span>(adult_train, <span class="at">m =</span> <span class="dv">10</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect first imputed dataset:</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(adult_complete[[<span class="dv">1</span>]])</span></code></pre></div>
 <p>Finally, the <code>combine()</code> function allows users to estimate regression models on the completed datasets with Rubin’s combination rules. This function wraps the <code>glm()</code> package, whose arguments can be used to select different families of estimation methods (gaussian/OLS, binomial etc.) and to specify other aspects of the model:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co"># Estimate logit model on 10 completed datasets (using Rubin&#39;s combination rules)</span></span>
-<span id="cb6-2"><a href="#cb6-2"></a>adult_model &lt;-<span class="st"> </span><span class="kw">combine</span>(<span class="st">&quot;class_labels ~ hours_per_week + sex&quot;</span>, </span>
-<span id="cb6-3"><a href="#cb6-3"></a>                    adult_complete,</span>
-<span id="cb6-4"><a href="#cb6-4"></a>                    <span class="dt">family =</span> stats<span class="op">::</span>binomial)</span>
-<span id="cb6-5"><a href="#cb6-5"></a></span>
-<span id="cb6-6"><a href="#cb6-6"></a>adult_model</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate logit model on 10 completed datasets (using Rubin&#39;s combination rules)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>adult_model <span class="ot">&lt;-</span> <span class="fu">combine</span>(<span class="st">&quot;class_labels ~ hours_per_week + sex&quot;</span>, </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                    adult_complete,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">family =</span> stats<span class="sc">::</span>binomial)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>adult_model</span></code></pre></div>
 </div>
 
 
