@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function(e) {
     </style>
 
 
+
 <style type="text/css">
   code {
     white-space: pre;
@@ -333,23 +334,43 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<p>This vignette provides a brief demonstration of <strong>rMIDAS</strong>. We show how to use the package to multiply impute missing values in the Adult census dataset, which is commonly used for benchmarking machine learning tasks.</p>
+<p>This vignette provides a brief demonstration of
+<strong>rMIDAS</strong>. We show how to use the package to multiply
+impute missing values in the Adult census dataset, which is commonly
+used for benchmarking machine learning tasks.</p>
 <div id="ensure-your-system-is-correctly-configured" class="section level2">
 <h2>Ensure your system is correctly configured</h2>
-<p><strong>rMIDAS</strong> relies on Python to implement the MIDAS imputation algorithm, so you should ensure you have a Python 3.X environment installed on your machine. When the package is first loaded, it will try and automatically locate a suitable Python environment; if this fails, you will receive a warning message. When this occurs, users can manually specify a Python binary using <code>set_python_env()</code> or via <strong>reticulate</strong> directly (see <a href="custom_python_versions.html">this vignette</a> for more information).</p>
+<p><strong>rMIDAS</strong> relies on Python to implement the MIDAS
+imputation algorithm, so you should ensure you have a Python 3.X
+environment installed on your machine. When the package is first loaded,
+it will try and automatically locate a suitable Python environment; if
+this fails, you will receive a warning message. When this occurs, users
+can manually specify a Python binary using <code>set_python_env()</code>
+or via <strong>reticulate</strong> directly (see <a href="custom_python_versions.html">this vignette</a> for more
+information).</p>
 </div>
 <div id="loading-the-data" class="section level2">
 <h2>Loading the data</h2>
-<p>Once <strong>rMIDAS</strong> is initialized, we can load our data. For the purpose of this example, we’ll use a subset of the Adult data:</p>
+<p>Once <strong>rMIDAS</strong> is initialized, we can load our data.
+For the purpose of this example, we’ll use a subset of the Adult
+data:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rMIDAS)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>adult <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;https://raw.githubusercontent.com/MIDASverse/MIDASpy/master/Examples/adult_data.csv&quot;</span>,</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">row.names =</span> <span class="dv">1</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">1000</span>,]</span></code></pre></div>
-<p>As the dataset has a very low proportion of missingness (one of the reasons it is favored for machine learning tasks), we randomly set 10% of observed values as missing in each column using the <strong>rMIDAS</strong>’ <code>add_missingness()</code> function:</p>
+<p>As the dataset has a very low proportion of missingness (one of the
+reasons it is favored for machine learning tasks), we randomly set 10%
+of observed values as missing in each column using the
+<strong>rMIDAS</strong>’ <code>add_missingness()</code> function:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">89</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>adult <span class="ot">&lt;-</span> <span class="fu">add_missingness</span>(adult, <span class="at">prop =</span> <span class="fl">0.1</span>)</span></code></pre></div>
-<p>Next, we make a list of all categorical and binary variables, before preprocessing the data for training using the <code>convert()</code> function. Setting the <code>minmax_scale</code> argument to <code>TRUE</code> ensures that continuous variables are scaled between 0 and 1, which can substantially improve convergence in the training step. All pre-processing steps can be reversed after imputation:</p>
+<p>Next, we make a list of all categorical and binary variables, before
+preprocessing the data for training using the <code>convert()</code>
+function. Setting the <code>minmax_scale</code> argument to
+<code>TRUE</code> ensures that continuous variables are scaled between 0
+and 1, which can substantially improve convergence in the training step.
+All pre-processing steps can be reversed after imputation:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>adult_cat <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&#39;workclass&#39;</span>,<span class="st">&#39;marital_status&#39;</span>,<span class="st">&#39;relationship&#39;</span>,<span class="st">&#39;race&#39;</span>,<span class="st">&#39;education&#39;</span>,<span class="st">&#39;occupation&#39;</span>,<span class="st">&#39;native_country&#39;</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>adult_bin <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&#39;sex&#39;</span>,<span class="st">&#39;class_labels&#39;</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -358,21 +379,44 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">bin_cols =</span> adult_bin, </span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">cat_cols =</span> adult_cat,</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">minmax_scale =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
-<p>The data are now ready to be fed into the MIDAS algorithm, which involves a single call of the <code>train()</code> function. At this stage, we specify the dimensions, input corruption proportion, and other hyperparameters of the MIDAS neural network as well as the number of training epochs:</p>
+<p>The data are now ready to be fed into the MIDAS algorithm, which
+involves a single call of the <code>train()</code> function. At this
+stage, we specify the dimensions, input corruption proportion, and other
+hyperparameters of the MIDAS neural network as well as the number of
+training epochs:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Train the model for 2 epochs</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>adult_train <span class="ot">&lt;-</span> <span class="fu">train</span>(adult_conv,</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">training_epochs =</span> <span class="dv">20</span>,</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">layer_structure =</span> <span class="fu">c</span>(<span class="dv">128</span>,<span class="dv">128</span>),</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                       <span class="at">input_drop =</span> <span class="fl">0.75</span>,</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                       <span class="at">seed =</span> <span class="dv">89</span>)</span></code></pre></div>
-<p>Once training is complete, we can generate any number of completed datasets using the <code>complete()</code> function (below we generate 10). The completed dataframes can also be saved as ‘.csv’ files using the <code>file</code> and <code>file_root</code> arguments (not demonstrated here). By default, <code>complete()</code> unscales continuous variables and converts binary and categorical variables back to their original form.</p>
-<p>Since the MIDAS algorithm returns predicted probabilities for binary and categorical variables, imputed values of such variables can be generated using one of two options. When <code>fast = FALSE</code> (the default), <code>complete()</code> uses the predicted probabilities for each category level to take a weighted random draw from the set of all levels. When <code>fast = TRUE</code>, the function selects the level with the highest predicted probability. If completed datasets are very large or <code>complete()</code> is taking a long time to run, users may benefit from choosing the latter option:</p>
+<p>Once training is complete, we can generate any number of completed
+datasets using the <code>complete()</code> function (below we generate
+10). The completed dataframes can also be saved as ‘.csv’ files using
+the <code>file</code> and <code>file_root</code> arguments (not
+demonstrated here). By default, <code>complete()</code> unscales
+continuous variables and converts binary and categorical variables back
+to their original form.</p>
+<p>Since the MIDAS algorithm returns predicted probabilities for binary
+and categorical variables, imputed values of such variables can be
+generated using one of two options. When <code>fast = FALSE</code> (the
+default), <code>complete()</code> uses the predicted probabilities for
+each category level to take a weighted random draw from the set of all
+levels. When <code>fast = TRUE</code>, the function selects the level
+with the highest predicted probability. If completed datasets are very
+large or <code>complete()</code> is taking a long time to run, users may
+benefit from choosing the latter option:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate 10 imputed datasets</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>adult_complete <span class="ot">&lt;-</span> <span class="fu">complete</span>(adult_train, <span class="at">m =</span> <span class="dv">10</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect first imputed dataset:</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(adult_complete[[<span class="dv">1</span>]])</span></code></pre></div>
-<p>Finally, the <code>combine()</code> function allows users to estimate regression models on the completed datasets with Rubin’s combination rules. This function wraps the <code>glm()</code> package, whose arguments can be used to select different families of estimation methods (gaussian/OLS, binomial etc.) and to specify other aspects of the model:</p>
+<p>Finally, the <code>combine()</code> function allows users to estimate
+regression models on the completed datasets with Rubin’s combination
+rules. This function wraps the <code>glm()</code> package, whose
+arguments can be used to select different families of estimation methods
+(gaussian/OLS, binomial etc.) and to specify other aspects of the
+model:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate logit model on 10 completed datasets (using Rubin&#39;s combination rules)</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>adult_model <span class="ot">&lt;-</span> <span class="fu">combine</span>(<span class="st">&quot;class_labels ~ hours_per_week + sex&quot;</span>, </span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                    adult_complete,</span>
