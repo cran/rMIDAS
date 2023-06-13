@@ -356,7 +356,10 @@ overimpute <- function(# Input data
   matplot_render <- try(matplotlib$use("TkAgg"), silent = TRUE)
 
   if (inherits(matplot_render, "try-error")) {
-    stop("Cannot load TkAgg, which is needed to render the overimputation plot.\n You can try installing TkAgg by running the following at the command line: `sudo apt-get install python3-tk' ")
+    matplot_render <- try(matplotlib$use("Agg"), silent = TRUE)
+    if (inherits(matplot_render, "try-error")) {
+      stop("Cannot load TkAgg or Agg (headless), one of which is needed to render the overimputation plot.\n You can try installing TkAgg by running the following at the command line: `sudo apt-get install python3-tk' .")
+    }
   }
 
   mod_overimp <- mod_build$overimpute(spikein = spikein,
