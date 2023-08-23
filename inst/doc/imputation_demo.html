@@ -341,19 +341,23 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 <p>This vignette provides a brief demonstration of
-<strong>rMIDAS</strong>. We show how to use the package to multiply
-impute missing values in the Adult census dataset, which is commonly
-used for benchmarking machine learning tasks.</p>
+<strong>rMIDAS</strong>. We show how to use the package to impute
+missing values in the <a href="https://github.com/MIDASverse/MIDASpy/blob/master/Examples/adult_data.csv"><em>Adult
+Census</em></a> dataset, which is commonly used for benchmarking machine
+learning tasks.</p>
 <div id="ensure-your-system-is-correctly-configured" class="section level2">
 <h2>Ensure your system is correctly configured</h2>
 <p><strong>rMIDAS</strong> relies on Python to implement the MIDAS
-imputation algorithm, so you should ensure you have a Python 3.X
-environment installed on your machine. When the package is first loaded,
-it will try and automatically locate a suitable Python environment; if
-this fails, you will receive a warning message. When this occurs, users
-can manually specify a Python binary using <code>set_python_env()</code>
-or via <strong>reticulate</strong> directly (see <a href="custom_python_versions.html">this vignette</a> for more
-information).</p>
+imputation algorithm, so a Python environment needs to be installed on
+your machine. Currently, Python versions from 3.6 to 3.10 are supported.
+When the package is first loaded, it will prompt the user on whether to
+set up a Python environment and its dependencies automatically. Users
+that choose to set up the environment and dependencies manually, or who
+use <strong>rMIDAS</strong> in headless mode can specify a Python binary
+using <code>set_python_env()</code>. For additional help on manually
+setting up a Python environment and its dependencies please refer to our
+other vignettes (<em>Using custom Python versions</em> and <em>Running
+rMIDAS on a server instance</em>) or visit the <a href="https://github.com/MIDASverse/rMIDAS/">rMIDAS GitHub</a> page.</p>
 </div>
 <div id="loading-the-data" class="section level2">
 <h2>Loading the data</h2>
@@ -390,7 +394,7 @@ involves a single call of the <code>train()</code> function. At this
 stage, we specify the dimensions, input corruption proportion, and other
 hyperparameters of the MIDAS neural network as well as the number of
 training epochs:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Train the model for 2 epochs</span></span>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Train the model for 20 epochs</span></span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>adult_train <span class="ot">&lt;-</span> <span class="fu">train</span>(adult_conv,</span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                       <span class="at">training_epochs =</span> <span class="dv">20</span>,</span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>                       <span class="at">layer_structure =</span> <span class="fu">c</span>(<span class="dv">128</span>,<span class="dv">128</span>),</span>

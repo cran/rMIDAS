@@ -25,7 +25,7 @@ LOCAL <- identical(Sys.getenv("LOCAL"), "true")
 #                        minmax_scale = TRUE)
 
 ## ---- eval = LOCAL------------------------------------------------------------
-#  # Train the model for 2 epochs
+#  # Train the model for 20 epochs
 #  adult_train <- train(adult_conv,
 #                         training_epochs = 20,
 #                         layer_structure = c(128,128),

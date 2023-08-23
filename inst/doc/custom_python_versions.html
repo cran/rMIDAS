@@ -345,18 +345,21 @@ session’s connection to Python using the <strong>rMIDAS</strong> package
 as well as <a href="https://github.com/rstudio/reticulate"><strong>reticulate</strong></a>.</p>
 <div id="option-1-do-nothing" class="section level2">
 <h2>Option 1: Do nothing!</h2>
-<p>rMIDAS relies on Python 3.X to run the MIDAS imputation algorithm
-(note: Python 3.9 is as yet untested for full rMIDAS functionality). For
-most users, the default settings in <strong>rMIDAS</strong> will be
+<p>rMIDAS relies on Python to run the MIDAS imputation algorithm.
+Currently, Python versions from 3.6 to 3.10 are supported. For most
+users, the default settings in <strong>rMIDAS</strong> will be
 sufficient. Both <code>train()</code> and <code>complete()</code> check
-if Python has been initialized and, if not, run the required setup using
-the best Python 3 version available on your system (as determined by
-<strong>reticulate</strong>). The first time you run
-<strong>rMIDAS</strong> after installation, you may be prompted to
-install additional Python dependencies.</p>
-<p>If a suitable Python version is not found on your system, you will be
-asked to manually set the path to a Python binary. You can do this using
-the next option.</p>
+if Python has been initialized. The first time you call
+<strong>rMIDAS</strong> after installation, you will be prompted on
+whether to set up the Python environment and dependencies
+automatically.</p>
+<p>If the automatic setup fails or you want to set up your Python
+environment manually, you can do this using the next option.</p>
+<p><em>Note</em>: If you are using <strong>rMIDAS</strong> in headless
+mode (for example using Amazon AWS), the automatic setup will not
+execute. In this instance you need to set up the Python environment and
+its dependencies manually. Please refer to our <em>Running rMIDAS on a
+server instance</em> vignette for additional help.</p>
 </div>
 <div id="option-2" class="section level2">
 <h2>Option 2:</h2>
@@ -366,36 +369,40 @@ Python binary on your system, you can use the
 providing an exact path to your chosen Python binary:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(rMIDAS)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">set_python_env</span>(<span class="at">x =</span> <span class="st">&quot;~/path/to/bin/python&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co"># Decline the automatic setup</span></span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co"># Then proceed as normal...</span></span></code></pre></div>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">set_python_env</span>(<span class="at">x =</span> <span class="st">&quot;~/path/to/bin/python&quot;</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co"># Then proceed as normal...</span></span></code></pre></div>
 <p>With <code>set_python_env()</code> you can also set a virtualenv or
-condaenv environment:</p>
+conda environment:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(rMIDAS)</span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">set_python_env</span>(<span class="at">x =</span> <span class="st">&quot;myenv&quot;</span>, <span class="at">type =</span> <span class="st">&quot;virtualenv&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># Decline the automatic setup</span></span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">set_python_env</span>(<span class="at">x =</span> <span class="st">&quot;myenv&quot;</span>, <span class="at">type =</span> <span class="st">&quot;virtualenv&quot;</span>)</span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">set_python_env</span>(<span class="at">x =</span> <span class="st">&quot;mycondaenv&quot;</span>, <span class="at">type =</span> <span class="st">&quot;conda&quot;</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co"># or</span></span>
 <span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co"># Then proceed as normal...</span></span></code></pre></div>
-<p>On the <a href="https://github.com/MIDASverse/rMIDAS/">GitHub
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="fu">set_python_env</span>(<span class="at">x =</span> <span class="st">&quot;mycondaenv&quot;</span>, <span class="at">type =</span> <span class="st">&quot;conda&quot;</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co"># Then proceed as normal...</span></span></code></pre></div>
+<p>On the <a href="https://github.com/MIDASverse/rMIDAS/">rMIDAS GitHub
 repository</a> you can also find an environment file
 (<code>rmidas-env.yml</code>) which can be used to initialise a new
-conda environment that contains Python 3.7 and all required
+conda environment that contains Python 3.8 and all required
 dependencies.</p>
 <p>Once you have downloaded this file, in your console navigate to the
 download directory and run:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="ex">conda</span> env create <span class="at">-f</span> rmidas-env.yml</span></code></pre></div>
 <p>Then, prior to training a MIDAS model, make sure to load this
 environment in R:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">set_python_env</span>(<span class="at">x =</span> <span class="st">&quot;rmidas-env&quot;</span>, <span class="at">type =</span> <span class="st">&quot;conda&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">set_python_env</span>(<span class="at">x =</span> <span class="st">&quot;rmidas&quot;</span>, <span class="at">type =</span> <span class="st">&quot;conda&quot;</span>)</span></code></pre></div>
 <p><em>Note</em>: <strong>reticulate</strong> only allows you to set a
 Python binary once per R session, so if you wish to switch to a
 different Python binary, or have already run <code>train()</code> or
-<code>convert()</code>, you will need to restart R prior to using
-<code>set_python_env()</code>.</p>
+<code>convert()</code>, you will need to restart or terminate R prior to
+using <code>set_python_env()</code>.</p>
 </div>
 <div id="option-3" class="section level2">
 <h2>Option 3:</h2>
@@ -407,11 +414,13 @@ configuration tools. Since these commands are outside of
 e.g.:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">library</span>(rMIDAS)</span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>reticulate<span class="sc">::</span><span class="fu">use_condaenv</span>(<span class="at">condaenv =</span> <span class="st">&quot;myenv&quot;</span>, <span class="at">conda =</span> <span class="st">&quot;some_conda_executable&quot;</span>, <span class="at">required =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">midas_setup</span>()</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co"># Then proceed as normal...</span></span></code></pre></div>
-<p>As with option 2, <strong>reticulate</strong> only allows you to set
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co"># Decline the automatic setup</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>reticulate<span class="sc">::</span><span class="fu">use_condaenv</span>(<span class="at">condaenv =</span> <span class="st">&quot;myenv&quot;</span>, <span class="at">conda =</span> <span class="st">&quot;some_conda_executable&quot;</span>, <span class="at">required =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="fu">midas_setup</span>()</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co"># Then proceed as normal...</span></span></code></pre></div>
+<p>As with Option 2, <strong>reticulate</strong> only allows you to set
 a Python binary once per R session. If you wish to switch to a different
 Python binary, or have already run <code>train()</code> or
 <code>convert()</code>, you will need to restart R prior to changing
@@ -421,12 +430,14 @@ Python version and then call <code>midas_setup()</code>.</p>
 <h2>Troubleshooting errors</h2>
 <p>Sometimes the above three options may fail due to system
 configuration issues. Here we note a few common issues and fixes.</p>
-<div id="mac-defaults-to-python-2.7" class="section level3">
-<h3>Mac defaults to Python 2.7</h3>
-<p>If you are using a Mac, <strong>reticulate</strong> may be defaulting
-to Python 2.7 which is not supported by <strong>rMIDAS</strong>. If this
-is the case you will have to configure the R session to use a Python 3
-binary, as in option 2 above, by running:</p>
+<div id="older-versions-of-macos-default-to-python-2.7" class="section level3">
+<h3>Older versions of macOS default to Python 2.7</h3>
+<p>Macs used to come with Python 2.7 pre-installed between macOS
+versions 10.8 and 12.3. If you are using a Mac,
+<strong>reticulate</strong> may be defaulting to Python 2.7 which is not
+supported by <strong>rMIDAS</strong>. If this is the case you will have
+to configure the R session to use a Python 3 binary, as in option 2
+above, by running:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">set_python_env</span>(<span class="at">x =</span> <span class="st">&quot;/usr/local/bin/python3&quot;</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co"># Then proceed as normal...</span></span></code></pre></div>
