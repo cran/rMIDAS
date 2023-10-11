@@ -38,6 +38,9 @@ List of length \code{m}, each element of which is a completed data.frame (i.e. n
 \description{
 Having trained an imputation model, complete() produces \code{m} completed datasets, saved as a list.
 }
+\details{
+For more information, see Lall and Robinson (2023): \url{doi:10.18637/jss.v107.i09}.
+}
 \examples{
 # Generate raw data, with numeric, binary, and categorical variables
 \dontrun{
@@ -74,5 +77,8 @@ midas_pool <- combine(formula = d~a+c+e+f,
 }
 }
 
+}
+\references{
+\insertRef{rmidas_jss}{rMIDAS}
 }
 \keyword{imputation}

@@ -37,6 +37,12 @@ import_midas <- function(...) {
 #' @export
 #' @return Object of class `midas` from which completed datasets can be drawn, using `rMIDAS::complete()`
 #' @example inst/examples/basic_workflow.R
+#' @details
+#' For more information, see Lall and Robinson (2023): <doi:10.18637/jss.v107.i09>.
+#'
+#' @references
+#' \insertRef{rmidas_jss}{rMIDAS}
+#' @importFrom Rdpack reprompt
 train <- function(data,
                    binary_columns = NULL,
                    softmax_columns = NULL,
@@ -132,6 +138,11 @@ train <- function(data,
 #' @return List of length `m`, each element of which is a completed data.frame (i.e. no missing values)
 #' @import data.table
 #' @export
+#' @details
+#' For more information, see Lall and Robinson (2023): <doi:10.18637/jss.v107.i09>.
+#'
+#' @references
+#' \insertRef{rmidas_jss}{rMIDAS}
 #' @example inst/examples/basic_workflow.R
 complete <- function(mid_obj,
                      m=10L,
@@ -267,6 +278,11 @@ complete <- function(mid_obj,
 #' @seealso \code{\link{train}} for the main imputation function.
 #' @export
 #' @return Object of class `midas`, and outputs both overimputation loss values to the console and generates overimputation graphs.
+#' @details
+#' For more information, see Lall and Robinson (2023): <doi:10.18637/jss.v107.i09>.
+#'
+#' @references
+#' \insertRef{rmidas_jss}{rMIDAS}
 #' @example inst/examples/overimputation.R
 overimpute <- function(# Input data
                        data,
